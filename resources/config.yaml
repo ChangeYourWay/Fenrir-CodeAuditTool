@@ -1,0 +1,16 @@
+deepseek:
+  api_key: ""
+
+# 代码审计配置
+code_audit:
+  # 代码仓库路径
+  repository_path: "D:\\CodeAudit\\Apache Sling CMS 1.1.8\\apache-sling-cms-1.1.8"
+  
+  # AST缓存配置
+  ast_cache:
+    # 是否启用AST缓存
+    enabled: true
+    # AST缓存目录
+    cache_dir: "./cache"
+    # 是否在启动时重新构建AST（当enabled为true时，此选项生效）
+    rebuild_on_startup: false
