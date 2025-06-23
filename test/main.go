@@ -54,33 +54,33 @@ func main() {
 		log.Printf("打印统计信息失败：%v", err)
 	}
 
-	//className := "com.example.vulnerablejava.realm.UserRealm"
-	//methodName := ""
-	//fieldName := ""
+	className := "LoginServlet"
+	methodName := "isSelf"
+	fieldName := ""
+
+	// 调用统一搜索函数
+	results, err := utils.UnifiedSearch(query, className, methodName, fieldName)
+	if err != nil {
+		return
+	}
+
+	// 格式化结果
+	resultStr := utils.FormatSearchResults(results)
+
+	// 打印结果
+	fmt.Println(resultStr)
+
+	//superClasses := utils.GetAllSuperClasses(query, "org.apache.sling.auth.core.impl.LoginServlet")
 	//
-	//// 调用统一搜索函数
-	//results, err := utils.UnifiedSearch(query, className, methodName, fieldName)
-	//if err != nil {
-	//	return
+	//subClasses := utils.GetAllSubClasses(query, "org.apache.sling.api.servlets.SlingSafeMethodsServlet")
+	//
+	//fmt.Printf("Superclasses of %s:\n", "org.apache.sling.auth.core.impl.LoginServlet")
+	//for _, superClass := range superClasses {
+	//	fmt.Printf("Superclass: %s\n", superClass)
 	//}
-	//
-	//// 格式化结果
-	//resultStr := utils.FormatSearchResults(results)
-
-	//// 打印结果
-	//fmt.Println(resultStr)
-
-	superClasses := utils.GetAllSuperClasses(query, "org.apache.sling.auth.core.impl.LoginServlet")
-
-	subClasses := utils.GetAllSubClasses(query, "org.apache.sling.api.servlets.SlingSafeMethodsServlet")
-
-	fmt.Printf("Superclasses of %s:\n", "org.apache.sling.auth.core.impl.LoginServlet")
-	for _, superClass := range superClasses {
-		fmt.Printf("Superclass: %s\n", superClass)
-	}
-	fmt.Printf("Subclasses of %s:\n", "org.apache.sling.api.servlets.SlingSafeMethodsServlet")
-	for _, subClass := range subClasses {
-		fmt.Printf("Subclass: %s\n", subClass)
-	}
+	//fmt.Printf("Subclasses of %s:\n", "org.apache.sling.api.servlets.SlingSafeMethodsServlet")
+	//for _, subClass := range subClasses {
+	//	fmt.Printf("Subclass: %s\n", subClass)
+	//}
 
 }

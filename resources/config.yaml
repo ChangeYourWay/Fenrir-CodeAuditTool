@@ -4,7 +4,7 @@ deepseek:
 # 代码审计配置
 code_audit:
   # 代码仓库路径
-  repository_path: "D:\\CodeAudit\\Apache Sling CMS 1.1.8\\apache-sling-cms-1.1.8"
+  repository_path: "D:\\CodeAudit\\java-sec-code-master\\java-sec-code-master"
   
   # AST缓存配置
   ast_cache:

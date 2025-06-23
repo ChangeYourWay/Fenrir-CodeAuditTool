@@ -4,6 +4,7 @@ import (
 	"Fenrir-CodeAuditTool/configs"
 	"context"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -14,7 +15,56 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 )
 
+// loadPrompt 从指定路径读取 prompt 文件内容
+func loadPrompt(path string) (string, error) {
+	data, err := ioutil.ReadFile(path)
+	if err != nil {
+		return "", err
+	}
+	return string(data), nil
+}
+
 func main() {
+
+	fmt.Println("服务器启动")
+	s := server.NewMCPServer(
+		"Fenrir - 基于 MCP 的自动化代码审计工具",
+		"1.1.0",
+	)
+
+	// --- 注册 Prompt ---
+	// 1. 读取 prompts/CodeGetPrompts.txt 文件
+	promptContent, err := loadPrompt("prompts/CodeGetPrompts.txt")
+	if err != nil {
+		log.Fatalf("加载 prompts/CodeGetPrompts.txt 失败：%v", err)
+	}
+
+	// 2. 定义一个不带参数的 Prompt
+	codePrompt := mcp.NewPrompt(
+		"code-get-prompts",
+		mcp.WithPromptDescription("返回 CodeGetPrompts.txt 中定义的所有 prompt 文本"),
+	)
+
+	// 3. 注册 Prompt，处理函数直接返回文件内容
+	s.AddPrompt(codePrompt, func(ctx context.Context, req mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
+		// 先将 promptContent 转为 TextContent
+		content, ok := mcp.AsTextContent(promptContent)
+		if !ok {
+			return nil, fmt.Errorf("无法将 promptContent 转换为 TextContent")
+		}
+
+		// 构造一条用户角色的 PromptMessage，内容就是整个文件
+		msg := mcp.NewPromptMessage(
+			mcp.RoleUser,
+			content,
+		)
+		// 返回结果，不包含任何错误
+		return mcp.NewGetPromptResult(
+			codePrompt.GetName(),
+			[]mcp.PromptMessage{msg},
+		), nil
+	})
+
 	// 加载配置文件
 	config, err := configs.LoadDefaultConfig()
 	if err != nil {
@@ -40,12 +90,6 @@ func main() {
 		fmt.Printf("错误：指定的路径不存在：%s\n", absPath)
 		os.Exit(1)
 	}
-
-	fmt.Println("服务器启动")
-	s := server.NewMCPServer(
-		"Fenrir - 基于 MCP 的自动化代码审计工具",
-		"1.1.0",
-	)
 
 	// 创建AST构建服务
 	astService := utils.NewASTBuilderService(config)
@@ -180,7 +224,10 @@ func main() {
 	})
 
 	// 创建基于 SSE 的服务器实例
-	sseServer := server.NewSSEServer(s, server.WithBaseURL("http://localhost:8338"))
+	sseServer := server.NewSSEServer(s,
+		server.WithBaseURL("http://localhost:8338"),
+	)
+
 	log.Printf("SSE server listening on http://localhost:8338")
 	// 启动服务器
 	err = sseServer.Start(":8338")
