@@ -124,11 +124,11 @@ func main() {
 		),
 		mcp.WithString("methodName",
 			mcp.Required(),
-			mcp.Description("本参数 methodName 用于指定要搜索的方法，可以选择带上参数类型，为可选选项。"+
-				"例如 myMethod 表示仅根据方法名搜索，仅根据方法名搜索时会返回所有重构方法。"+
-				"myMethod() 表示根据方法名和参数类型搜索，此时为无参。"+
-				"myMethod(ArgTpye1 arg1, ArgType2[] arg2, String arg3) 表示根据方法名和参数类型搜索，此时为有参。"+
-				"在没有具体的参数名称时，你可以用 arg0, arg1，arg2... 表示参数名称"),
+			mcp.Description("本参数 methodName 用于指定要搜索的方法，可以选择带上参数类型，为可选选项。下面是调用方法："+
+				"1、myMethod 表示仅根据方法名搜索，仅根据方法名搜索时会返回所有重构方法。"+
+				"2、myMethod() 表示根据方法名和参数类型搜索，此时为无参。"+
+				"3、myMethod(ArgTpye1 arg1, ArgType2[] arg2, String arg3) 表示根据方法名和参数类型搜索，此时为有参。在没有具体的参数名称时，你需要用 arg0, arg1，arg2... 表示参数名称",
+			),
 		),
 		mcp.WithString("fieldName",
 			mcp.Required(),

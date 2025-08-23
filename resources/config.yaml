@@ -4,7 +4,7 @@ deepseek:
 # 代码审计配置
 code_audit:
   # 代码仓库路径
-  repository_path: "D:\\CodeAudit\\java-sec-code-master\\java-sec-code-master"
+  repository_path: "D:\\CodeAudit\\Commons-collection\\Commons-collection_decompiled\\commons-collections-3.2.1"
   
   # AST缓存配置
   ast_cache:
