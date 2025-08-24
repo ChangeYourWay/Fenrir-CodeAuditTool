@@ -57,8 +57,9 @@ func ParseMethodSignature(methodSignature string) (string, []string) {
 		// 处理最后一个参数
 		paramParts := strings.Fields(strings.TrimSpace(currentParam))
 		if len(paramParts) > 0 {
+
 			paramType := strings.Join(paramParts[:len(paramParts)-1], " ")
-			params = append(params, strings.TrimSpace(paramType))
+			params = append(params, strings.TrimSpace(ShortClassName(paramType)))
 		}
 	}
 
@@ -66,6 +67,13 @@ func ParseMethodSignature(methodSignature string) (string, []string) {
 	fmt.Printf("Parsed method signature: %s -> %s, params: %v\n", methodSignature, methodName, params)
 
 	return methodName, params
+}
+
+func ShortClassName(fullName string) string {
+	if idx := strings.LastIndex(fullName, "."); idx != -1 {
+		return fullName[idx+1:]
+	}
+	return fullName
 }
 
 // IsMatchingMethod 检查方法是否匹配指定的方法签名

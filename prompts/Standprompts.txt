@@ -38,4 +38,4 @@ Description: 通用的开发最佳实践。
 Includes:
     - 强调版本控制和代码文档的重要性。
     - 遵循 DRY（Don't Repeat Yourself）和 KISS（Keep It Simple, Stupid）原则
-    - 确保所有代码更改都附有相关的单元测试和集成测试
+    - 确保所有代码更改都附有相关的单元测试和集成 测试
