@@ -139,10 +139,51 @@ func main() {
 		var className string
 		var methodName string
 		var fieldName string
-		if args, ok := request.Params.Arguments.(map[string]any); ok {
-			className = args["className"].(string)
-			methodName = args["methodName"].(string)
-			fieldName = args["fieldName"].(string)
+		if request.Params.Arguments != nil {
+			if args, ok := request.Params.Arguments.(map[string]any); ok {
+				// className
+				if v, exists := args["className"]; exists && v != nil {
+					if s, ok := v.(string); ok {
+						className = s
+					} else {
+						className = fmt.Sprint(v)
+					}
+				} else {
+					className = ""
+				}
+
+				// methodName
+				if v, exists := args["methodName"]; exists && v != nil {
+					if s, ok := v.(string); ok {
+						methodName = s
+					} else {
+						methodName = fmt.Sprint(v)
+					}
+				} else {
+					methodName = ""
+				}
+
+				// fieldName
+				if v, exists := args["fieldName"]; exists && v != nil {
+					if s, ok := v.(string); ok {
+						fieldName = s
+					} else {
+						fieldName = fmt.Sprint(v)
+					}
+				} else {
+					fieldName = ""
+				}
+			} else {
+				// Arguments 不是 map[string]any 时也赋默认空串，防止后续使用 panic
+				className = ""
+				methodName = ""
+				fieldName = ""
+			}
+		} else {
+			// Params 或 Arguments 为 nil
+			className = ""
+			methodName = ""
+			fieldName = ""
 		}
 
 		// 调用统一搜索函数
@@ -180,9 +221,39 @@ func main() {
 	s.AddTool(classHierarchyTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 		var className string
 		var typ string
-		if args, ok := request.Params.Arguments.(map[string]any); ok {
-			className = args["className"].(string)
-			typ = args["type"].(string)
+
+		if request.Params.Arguments != nil {
+			if args, ok := request.Params.Arguments.(map[string]any); ok {
+				// className
+				if v, exists := args["className"]; exists && v != nil {
+					if s, ok := v.(string); ok {
+						className = s
+					} else {
+						className = fmt.Sprint(v)
+					}
+				} else {
+					className = ""
+				}
+
+				// methodName
+				if v, exists := args["type"]; exists && v != nil {
+					if s, ok := v.(string); ok {
+						typ = s
+					} else {
+						typ = fmt.Sprint(v)
+					}
+				} else {
+					typ = ""
+				}
+			} else {
+				// Arguments 不是 map[string]any 时也赋默认空串，防止后续使用 panic
+				className = ""
+				typ = ""
+			}
+		} else {
+			// Params 或 Arguments 为 nil
+			className = ""
+			typ = ""
 		}
 
 		var resultStr string
