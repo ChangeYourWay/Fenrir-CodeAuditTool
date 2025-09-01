@@ -2,14 +2,13 @@ package main
 
 import (
 	"Fenrir-CodeAuditTool/configs"
+	"Fenrir-CodeAuditTool/internal/utils"
 	"context"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
-
-	"Fenrir-CodeAuditTool/internal/utils"
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
@@ -25,46 +24,6 @@ func loadPrompt(path string) (string, error) {
 }
 
 func main() {
-
-	fmt.Println("服务器启动")
-	s := server.NewMCPServer(
-		"Fenrir - 基于 MCP 的自动化代码审计工具",
-		"1.1.0",
-	)
-
-	// --- 注册 Prompt ---
-	// 1. 读取 prompts/CodeGetPrompts.txt 文件
-	promptContent, err := loadPrompt("prompts/CodeGetPrompts.txt")
-	if err != nil {
-		log.Fatalf("加载 prompts/CodeGetPrompts.txt 失败：%v", err)
-	}
-
-	// 2. 定义一个不带参数的 Prompt
-	codePrompt := mcp.NewPrompt(
-		"code-get-prompts",
-		mcp.WithPromptDescription("返回 CodeGetPrompts.txt 中定义的所有 prompt 文本"),
-	)
-
-	// 3. 注册 Prompt，处理函数直接返回文件内容
-	s.AddPrompt(codePrompt, func(ctx context.Context, req mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
-		// 先将 promptContent 转为 TextContent
-		content, ok := mcp.AsTextContent(promptContent)
-		if !ok {
-			return nil, fmt.Errorf("无法将 promptContent 转换为 TextContent")
-		}
-
-		// 构造一条用户角色的 PromptMessage，内容就是整个文件
-		msg := mcp.NewPromptMessage(
-			mcp.RoleUser,
-			content,
-		)
-		// 返回结果，不包含任何错误
-		return mcp.NewGetPromptResult(
-			codePrompt.GetName(),
-			[]mcp.PromptMessage{msg},
-		), nil
-	})
-
 	// 加载配置文件
 	config, err := configs.LoadDefaultConfig()
 	if err != nil {
@@ -91,8 +50,15 @@ func main() {
 		os.Exit(1)
 	}
 
+	fmt.Println("服务器启动")
+	s := server.NewMCPServer(
+		"Fenrir - 基于 MCP 的自动化代码审计工具",
+		"1.1.0",
+	)
+
 	// 创建AST构建服务
 	astService := utils.NewASTBuilderService(config)
+	//ps := &ProjectService{config: config}
 
 	// 构建或加载AST索引
 	index, err := astService.BuildOrLoadAST()
@@ -108,6 +74,8 @@ func main() {
 	if err != nil {
 		log.Printf("打印统计信息失败：%v", err)
 	}
+
+	//ps.RegisterMcpServer(s)
 
 	// 注册基于 AST 的代码搜索工具
 	codeSearchTool := mcp.NewTool("code_search",
@@ -132,7 +100,7 @@ func main() {
 		),
 		mcp.WithString("fieldName",
 			mcp.Required(),
-			mcp.Description("本参数 fieldName 用于指定要搜索的字段名，为可选选项。例如 myField 。 "),
+			mcp.Description("本参数 fieldName 用于指定要搜索的字段名，为可选选项。例如 myField 。没有指定时候必须为空字符串 "),
 		),
 	)
 	s.AddTool(codeSearchTool, func(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
