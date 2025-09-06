@@ -4,6 +4,7 @@ import (
 	"Fenrir-CodeAuditTool/configs"
 	"Fenrir-CodeAuditTool/internal/utils"
 	"context"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -23,17 +24,71 @@ func loadPrompt(path string) (string, error) {
 	return string(data), nil
 }
 
+func ensureDefaultResourcesAndCache() error {
+	// 确保 resources/config.yaml 存在；若不存在创建并写入 AST-only 内容
+	resourcesDir := "resources"
+	configPath := filepath.Join(resourcesDir, "config.yaml")
+	if _, err := os.Stat(configPath); os.IsNotExist(err) {
+		if err := os.MkdirAll(resourcesDir, 0755); err != nil {
+			return fmt.Errorf("创建 resources 目录失败: %v", err)
+		}
+		defaultYaml := `# 代码审计配置
+code_audit:
+  # 代码仓库路径
+  repository_path: ""
+  
+  # AST缓存配置
+  ast_cache:
+    # 是否启用AST缓存
+    enabled: true
+    # AST缓存目录
+    cache_dir: "./cache"
+    # 是否在启动时重新构建AST（当enabled为true时，此选项生效）
+    rebuild_on_startup: false
+`
+		if err := os.WriteFile(configPath, []byte(defaultYaml), 0644); err != nil {
+			return fmt.Errorf("写入默认 resources/config.yaml 失败: %v", err)
+		}
+		fmt.Println("resources/config.yaml 不存在，已创建默认配置。")
+	}
+
+	// 确保 ./cache 目录存在（默认）。注意：具体cache目录我们之后还会用config里的cache_dir进一步确保
+	if _, err := os.Stat("./cache"); os.IsNotExist(err) {
+		if err := os.MkdirAll("./cache", 0755); err != nil {
+			return fmt.Errorf("创建 cache 目录失败: %v", err)
+		}
+		fmt.Println("./cache 目录不存在，已创建。")
+	}
+
+	return nil
+}
+
 func main() {
-	// 加载配置文件
+	// 解析 -i 参数（仓库路径）
+	repoPathFlag := flag.String("i", "", "代码仓库路径（优先于 resources/config.yaml 中的配置）")
+	flag.Parse()
+
+	// 在加载配置前，确保 resources/config.yaml 与 ./cache 在当前目录下存在（若不存在则创建）
+	if err := ensureDefaultResourcesAndCache(); err != nil {
+		fmt.Printf("启动前初始化失败: %v\n", err)
+		os.Exit(1)
+	}
+
+	// 加载配置文件（resources/config.yaml）
 	config, err := configs.LoadDefaultConfig()
 	if err != nil {
 		fmt.Printf("加载配置文件失败: %v\n", err)
 		os.Exit(1)
 	}
 
-	// 检查代码仓库路径
+	// 如果命令行提供了 -i，则以命令行参数为准（覆盖配置文件中的 repository_path）
+	if repoPathFlag != nil && *repoPathFlag != "" {
+		config.CodeAudit.RepositoryPath = *repoPathFlag
+	}
+
+	// 检查代码仓库路径是否存在（必须要有路径）
 	if config.CodeAudit.RepositoryPath == "" {
-		fmt.Println("错误：配置文件中未指定代码仓库路径")
+		fmt.Println("错误：未指定代码仓库路径。请通过 -i 参数或 resources/config.yaml 中的 code_audit.repository_path 提供。")
 		os.Exit(1)
 	}
 
@@ -47,6 +102,16 @@ func main() {
 	// 检查路径是否存在
 	if _, err := os.Stat(absPath); os.IsNotExist(err) {
 		fmt.Printf("错误：指定的路径不存在：%s\n", absPath)
+		os.Exit(1)
+	}
+
+	// 根据配置确保 cache 目录存在（如果配置中指定了其他目录）
+	cacheDir := config.CodeAudit.ASTCache.CacheDir
+	if cacheDir == "" {
+		cacheDir = "./cache"
+	}
+	if err := os.MkdirAll(cacheDir, 0755); err != nil {
+		fmt.Printf("无法创建/访问缓存目录 %s: %v\n", cacheDir, err)
 		os.Exit(1)
 	}
 

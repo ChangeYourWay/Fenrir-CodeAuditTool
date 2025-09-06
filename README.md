@@ -45,11 +45,12 @@ go build -o fenrir
 
 ## 使用方法
 
-第一步，在 resources\config.yaml 文件中指定代码仓库路径，双斜杠。
+第一步，运行 exe 文件，或者 application/server/main.go 文件，你可以在命令行中使用 -i 参数指定代码仓库路径，
+或者在 resources\config.yaml 文件中指定代码仓库路径（务必使用双斜杠），启动 MCP 服务端。
+命令行指定示例：
+.\Fenrir-CodeAuditTool.exe -i "D:\CodeAudit\Apache Sling CMS 1.1.8\apache-sling-cms-1.1.8"
 
-第二步，双击运行项目根路径下的 fenrir-server.exe 文件，或者直接运行 application/server/main.go，启动 MCP 服务端。
-
-第三步，使用 Cherry Studio 或其他客户端工具配置此 MCP 服务器，配置大模型 API 密钥，即可开始对话使用。（大模型的 API 密钥需要自行购买）。
+第二步，使用 Cherry Studio 或其他客户端工具配置此 MCP 服务器，配置大模型 API 密钥，即可开始对话使用。（大模型的 API 密钥需要自行购买）。
 
 注：你可以在 cache 目录下查看对应代码仓库的 AST 缓存文件。
 

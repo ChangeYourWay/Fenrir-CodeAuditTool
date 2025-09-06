@@ -1,6 +1,3 @@
-deepseek:
-  api_key: ""
-
 # 代码审计配置
 code_audit:
   # 代码仓库路径
