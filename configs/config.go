@@ -23,6 +23,16 @@ type Config struct {
 			RebuildOnStartup bool   `yaml:"rebuild_on_startup"`
 		} `yaml:"ast_cache"`
 	} `yaml:"code_audit"`
+
+	// 新增远程仓库配置
+	RemoteRepository struct {
+		Enabled    bool   `yaml:"enabled"`
+		Type       string `yaml:"type"` // "zip", "git", "local"
+		URL        string `yaml:"url"`
+		Branch     string `yaml:"branch"`
+		TargetPath string `yaml:"target_path"`
+		AutoClean  bool   `yaml:"auto_clean"`
+	} `yaml:"remote_repository"`
 }
 
 // LoadConfig 加载配置文件
