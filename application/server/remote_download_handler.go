@@ -66,7 +66,6 @@ type DownloadResponse struct {
 func NewRemoteDownloadService(config *configs.Config) *RemoteDownloadService {
 	service := &RemoteDownloadService{
 		config:      config,
-		zipHandler:  utils.NewZipHandler(config.FileUpload.UploadDir),
 		downloadSem: make(chan struct{}, 5), // 最大5个并发下载
 	}
 
@@ -82,19 +81,19 @@ func NewRemoteDownloadService(config *configs.Config) *RemoteDownloadService {
 }
 
 // HandleRemoteDownload 处理远程下载请求
-func (rds *RemoteDownloadService) HandleRemoteDownload(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	// ... 其他代码 ...
-
-	// 使用配置的超时时间
-	select {
-	case response := <-resultChan:
-		// ... 处理响应 ...
-	case err := <-errorChan:
-		// ... 处理错误 ...
-	case <-time.After(rds.config.GetDownloadTimeout()):
-		return rds.createErrorResponse("下载处理超时，请检查网络连接或文件大小"), nil
-	}
-}
+//func (rds *RemoteDownloadService) HandleRemoteDownload(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+//	// ... 其他代码 ...
+//
+//	// 使用配置的超时时间
+//	select {
+//	case response := <-resultChan:
+//		// ... 处理响应 ...
+//	case err := <-errorChan:
+//		// ... 处理错误 ...
+//	case <-time.After(rds.config.GetDownloadTimeout()):
+//		return rds.createErrorResponse("下载处理超时，请检查网络连接或文件大小"), nil
+//	}
+//}
 
 // cleanupRoutine 清理过期会话的协程
 func (sm *SessionManager) cleanupRoutine() {
@@ -104,24 +103,24 @@ func (sm *SessionManager) cleanupRoutine() {
 }
 
 // NewSessionManager 创建会话管理器
-func NewSessionManager() *SessionManager {
-	sm := &SessionManager{
-		sessions:    make(map[string]*UserSession),
-		cleanupTick: time.NewTicker(5 * time.Minute), // 每5分钟清理一次
-	}
-
-	// 启动清理协程
-	go sm.cleanupRoutine()
-
-	return sm
-}
+//func NewSessionManager() *SessionManager {
+//	sm := &SessionManager{
+//		sessions:    make(map[string]*UserSession),
+//		cleanupTick: time.NewTicker(5 * time.Minute), // 每5分钟清理一次
+//	}
+//
+//	// 启动清理协程
+//	go sm.cleanupRoutine()
+//
+//	return sm
+//}
 
 // cleanupRoutine 清理过期会话的协程
-func (sm *SessionManager) cleanupRoutine() {
-	for range sm.cleanupTick.C {
-		sm.cleanupExpiredSessions(24 * time.Hour) // 清理24小时前的会话
-	}
-}
+//func (sm *SessionManager) cleanupRoutine() {
+//	for range sm.cleanupTick.C {
+//		sm.cleanupExpiredSessions(24 * time.Hour) // 清理24小时前的会话
+//	}
+//}
 
 // CreateSession 创建新会话
 func (sm *SessionManager) CreateSession(projectDir string) *UserSession {
@@ -270,10 +269,10 @@ func (rds *RemoteDownloadService) processDownload(req DownloadRequest) (*Downloa
 		projectName = generateProjectNameFromURL(req.URL)
 	}
 
-	projectDir := filepath.Join(rds.config.FileUpload.ProjectsDir, projectName)
-	if err := os.MkdirAll(projectDir, 0755); err != nil {
-		return nil, fmt.Errorf("创建项目目录失败: %v", err)
-	}
+	//projectDir := filepath.Join(rds.config.FileUpload.ProjectsDir, projectName)
+	//if err := os.MkdirAll(projectDir, 0755); err != nil {
+	//	return nil, fmt.Errorf("创建项目目录失败: %v", err)
+	//}
 
 	// 下载文件
 	tempFile, fileSize, err := rds.downloadFile(req.URL, projectDir)
