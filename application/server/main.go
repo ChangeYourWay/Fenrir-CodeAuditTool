@@ -712,12 +712,30 @@ func main() {
 		}, nil
 	})
 
+	//host := flag.String("host", "0.0.0.0", "服务器监听地址")
+	//port := flag.String("port", "8338", "服务器监听端口")
+	//flag.Parse()
+	//
+	//baseURL := fmt.Sprintf("http://%s:%s", *host, *port)
+	//
+	//println(baseURL)
+
 	// 创建基于 SSE 的服务器实例
+	//sseServer := server.NewSSEServer(s, server.WithBaseURL(baseURL))
+	//err = sseServer.Start(fmt.Sprintf("%s:%s", *host, *port))
+
+	//sseServer := server.NewSSEServer(s,
+	//	server.WithBaseURL("http://0.0.0.0:8338"),
+	//)
+
+	// 创建基于 SSE 的服务器实例，使用相对路径
 	sseServer := server.NewSSEServer(s,
-		server.WithBaseURL("http://localhost:8338"),
+		server.WithBaseURL(""), // 使用空字符串或相对路径
+		// 或者明确指定相对路径
+		// server.WithBaseURL("/"),
 	)
 
-	log.Printf("SSE server listening on http://localhost:8338")
+	log.Printf("SSE server listening on http://0.0.0.0:8338")
 
 	// 启动服务器
 	err = sseServer.Start(":8338")
