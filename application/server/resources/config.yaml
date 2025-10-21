@@ -1,12 +1,8 @@
-# DeepSeek 配置
-deepseek:
-  api_key: "your-api-key-here"
-
 # 代码审计配置
 code_audit:
   # 代码仓库路径
   repository_path: ""
-
+  
   # AST缓存配置
   ast_cache:
     # 是否启用AST缓存

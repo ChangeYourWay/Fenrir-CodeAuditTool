@@ -131,3 +131,77 @@ Fenrir-CodeAuditTool/
 - [Tree-sitter](https://tree-sitter.github.io/tree-sitter/) - 用于代码解析
 - [Go AST](https://golang.org/pkg/go/ast/) - Go 语言 AST 支持
 - [Java Parser](https://github.com/smacker/go-tree-sitter-java) - Java 语言解析支持 
+
+
+## 新功能增加
+
+![img.png](img.png)
+
+功能设计
+支持多种代码源：
+
+ZIP 压缩包 URL 下载
+
+Git 仓库克隆
+
+本地路径直接分析
+
+自动化流程：
+
+自动下载/克隆代码
+
+自动解压（如果是压缩包）
+
+自动设置配置文件路径
+
+自动构建/加载 AST
+
+返回审计结果
+-----------------------------------
+
+主要修改和新增功能：
+
+服务器状态管理：新增 ServerState 结构体来管理服务器状态，包括就绪状态、AST索引和查询引擎
+
+条件等待：使用 sync.Cond 实现条件变量，让其他工具等待直到AST初始化完成
+
+动态初始化：如果 code_audit.repository_path 为空，服务器启动后等待用户通过 MCP 调用提供远程仓库地址
+
+工具依赖关系：
+
+remote_code_audit：始终可用，用于设置远程仓库和初始化AST
+
+code_search 和 class_hierarchy：只有在AST初始化后才可用，会等待直到就绪
+
+完整的错误处理：确保在各种情况下都能正确处理错误
+
+使用方式：
+
+启动服务器（无本地仓库）：
+
+bash
+./fenrir
+通过 MCP 客户端提供远程仓库：
+
+json
+{
+"tool": "remote_code_audit",
+"arguments": {
+"repository_url": "zip:https://example.com/project.zip"
+}
+}
+然后使用其他工具进行代码审计：
+
+json
+{
+"tool": "code_search",
+"arguments": {
+"className": "LoginServlet",
+"methodName": "",
+"fieldName": ""
+}
+}
+这样设计使得服务器更加灵活，可以动态接受远程代码仓库并进行审计。
+
+
+![img_1.png](img_1.png)
